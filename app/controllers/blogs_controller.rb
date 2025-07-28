@@ -21,7 +21,6 @@ class BlogsController < ApplicationController
 
   def create
     @blog = current_user.blogs.new(blog_params)
-    @blog.random_eyecatch = filter_random_eyecatch(blog_params[:random_eyecatch])
     if @blog.save
       redirect_to blog_url(@blog), notice: 'Blog was successfully created.'
     else
@@ -30,9 +29,7 @@ class BlogsController < ApplicationController
   end
 
   def update
-    new_blog_params = blog_params.deep_dup
-    new_blog_params[:random_eyecatch] = filter_random_eyecatch(blog_params[:random_eyecatch])
-    if @blog.update(new_blog_params)
+    if @blog.update(blog_params)
       redirect_to blog_url(@blog), notice: 'Blog was successfully updated.'
     else
       render :edit, status: :unprocessable_entity
@@ -52,10 +49,8 @@ class BlogsController < ApplicationController
   end
 
   def blog_params
-    params.require(:blog).permit(:title, :content, :secret, :random_eyecatch)
-  end
-
-  def filter_random_eyecatch(random_eyecatch)
-    current_user.premium ? random_eyecatch : '0'
+    accepted_params = %i[title content secret]
+    accepted_params << :random_eyecatch if current_user.premium?
+    params.require(:blog).permit(*accepted_params)
   end
 end

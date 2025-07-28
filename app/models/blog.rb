@@ -7,7 +7,7 @@ class Blog < ApplicationRecord
 
   validates :title, :content, presence: true
 
-  scope :published, -> { where('secret = FALSE') }
+  scope :published, -> { where(secret: false) }
 
   scope :search, lambda { |term|
     where('title LIKE ?', "%#{term}%").or(where('content LIKE ?', "%#{term}%"))
